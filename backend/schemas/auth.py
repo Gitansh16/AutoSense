@@ -27,3 +27,5 @@ class UserResponse(BaseModel):
     car_company: Optional[str] = None
     fleet_size: Optional[int] = None
     primary_use_case: List[str] = []
+    newsletter: bool = False
+    created_at: Optional[str] = None

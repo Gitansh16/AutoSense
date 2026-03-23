@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from database import init_db
 from routes.auth import router as auth_router
 from routes.predict import router as predict_router
+from routes.predict_truck import router as truck_router
 
 
 @asynccontextmanager
@@ -25,6 +26,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(predict_router)
+app.include_router(truck_router)
 
 
 @app.get("/")

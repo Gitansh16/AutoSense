@@ -5,13 +5,12 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import EVPrediction from './pages/EVPrediction';
+import TruckPrediction from './pages/TruckPrediction';
 import Navbar from './components/Navbar';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-// Protected route — redirects to /login if not authenticated
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-
   if (loading) {
     return (
       <div className="min-h-screen bg-dark-600 flex items-center justify-center">
@@ -19,52 +18,39 @@ const ProtectedRoute = ({ children }) => {
       </div>
     );
   }
-
   return user ? children : <Navigate to="/login" replace />;
 };
 
-// Layout wrapper for protected routes
-const ProtectedLayout = ({ children }) => {
-  return (
-    <div className="min-h-screen bg-dark-600">
-      <Navbar />
-      <main>{children}</main>
-    </div>
-  );
-};
+const ProtectedLayout = ({ children }) => (
+  <div className="min-h-screen bg-dark-600">
+    <Navbar />
+    <main>{children}</main>
+  </div>
+);
 
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Public */}
       <Route path="/" element={<Homepage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
-      {/* Protected Routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <ProtectedLayout>
-              <Dashboard />
-            </ProtectedLayout>
-          </ProtectedRoute>
-        }
-      />
+      {/* Protected */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute><ProtectedLayout><Dashboard /></ProtectedLayout></ProtectedRoute>
+      } />
 
-      <Route
-        path="/predict/:carId"
-        element={
-          <ProtectedRoute>
-            <ProtectedLayout>
-              <EVPrediction />
-            </ProtectedLayout>
-          </ProtectedRoute>
-        }
-      />
+      {/* Truck — must be BEFORE the generic :carId catch-all */}
+      <Route path="/predict/truck/:truckId" element={
+        <ProtectedRoute><ProtectedLayout><TruckPrediction /></ProtectedLayout></ProtectedRoute>
+      } />
 
-      {/* Redirect unknown routes */}
+      {/* EV */}
+      <Route path="/predict/:carId" element={
+        <ProtectedRoute><ProtectedLayout><EVPrediction /></ProtectedLayout></ProtectedRoute>
+      } />
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

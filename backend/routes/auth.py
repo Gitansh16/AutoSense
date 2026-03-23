@@ -50,4 +50,14 @@ async def get_me(credentials: HTTPAuthorizationCredentials = Depends(bearer_sche
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return UserResponse(id=str(user.id), name=user.name, email=user.email)
+    return UserResponse(
+    id=str(user.id),
+    name=user.name,
+    email=user.email,
+    car_name=user.car_name,
+    car_company=user.car_company,
+    fleet_size=user.fleet_size,
+    primary_use_case=user.primary_use_case,
+    newsletter=user.newsletter,
+    created_at=str(user.created_at),
+)
