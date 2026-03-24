@@ -5,7 +5,7 @@ import {
   ArrowLeft, Battery, Zap, Activity, AlertTriangle,
   CheckCircle, Clock, RefreshCw, Gauge, Wind, Weight, Radio,
 } from "lucide-react";
-import evMockData from "../mock/evMockData";
+import evMockData from "../mock/evmockData";
 import { buildFeatureVector, getRiskLevel, getSectionHealth } from "../mock/featureEngineering";
 import { apiFetch } from "../utils/api";
 

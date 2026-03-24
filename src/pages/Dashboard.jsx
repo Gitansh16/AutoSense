@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ResponsiveContainer, Area, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
-import evMockData from '../mock/evMockData';
+import evMockData from '../mock/evmockData';
 import trucks from '../mock/truckMockData';
 
 // ─── Shared status config ────────────────────────────────────────────────────
