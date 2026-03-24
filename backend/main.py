@@ -15,10 +15,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="ML One API", lifespan=lifespan)
 
-# CORS — React frontend runs on port 3000
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://auto-sense-five.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
