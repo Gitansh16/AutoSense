@@ -8,6 +8,8 @@ import EVPrediction from './pages/EVPrediction';
 import TruckPrediction from './pages/TruckPrediction';
 import Navbar from './components/Navbar';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { startKeepAlive } from './utils/keepAlive';
+startKeepAlive();
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
