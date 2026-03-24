@@ -17,7 +17,7 @@ from pydantic import BaseModel
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from scania_model import BiLSTMAttention
-from utils.auth import decode_access_token
+from utils.jwt import decode_access_token
 
 logger = logging.getLogger(__name__)
 

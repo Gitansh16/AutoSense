@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from models.user import User
 from schemas.auth import SignupRequest, LoginRequest, TokenResponse, UserResponse
-from utils.auth import hash_password, verify_password, create_access_token, decode_access_token
+from utils.auth import hash_password, verify_password
+from utils.jwt import create_access_token, decode_access_token
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 bearer_scheme = HTTPBearer()
