@@ -30,6 +30,48 @@ const SENSOR_TABS = {
   'Load & Ops':   ['loadWeight', 'oilConsumption', 'apsIndex'],
 };
 
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
+const STATUS_TO_CLASS = {
+  healthy: 0,
+  warning: 1,
+  alert: 2,
+  critical: 3,
+  imminent: 4,
+};
+const STATUS_TO_RISK = {
+  healthy: { label: 'Healthy (>48 h)', short: 'Healthy' },
+  warning: { label: 'Warning (48–24 h)', short: 'Warning' },
+  alert: { label: 'Alert (24–12 h)', short: 'Alert' },
+  critical: { label: 'Critical (12–6 h)', short: 'Critical' },
+  imminent: { label: 'Imminent (<6 h)', short: 'Imminent' },
+};
+
+const DEMO_PROBABILITIES = {
+  healthy: [92, 4, 2, 1, 1],
+  warning: [8, 78, 8, 4, 2],
+  alert: [3, 10, 68, 14, 5],
+  critical: [2, 4, 12, 68, 14],
+  imminent: [1, 2, 5, 12, 80],
+};
+
+const buildDemoPrediction = (truck) => {
+  const status = truck?.status || 'healthy';
+  const predictedClass = STATUS_TO_CLASS[status] ?? 0;
+  const risk = STATUS_TO_RISK[status] ?? STATUS_TO_RISK.healthy;
+  const probabilities = DEMO_PROBABILITIES[status] ?? DEMO_PROBABILITIES.healthy;
+  return {
+    vehicle_id: truck?.id || 'unknown',
+    predicted_class: predictedClass,
+    risk_label: risk.label,
+    risk_short: risk.short,
+    confidence_pct: Math.max(...probabilities),
+    probabilities,
+    model: 'Demo mode (mock)',
+    sequence_length: 50,
+    n_features: 105,
+  };
+};
+
 // ── Sub-components ─────────────────────────────────────────────────────────────
 const HealthRing = ({ score, label, icon: Icon, delay = 0 }) => {
   const r = 30, circ = 2 * Math.PI * r, dash = (score / 100) * circ;
@@ -172,6 +214,10 @@ const TruckPrediction = () => {
     if (!t) return;
     setLoading(true); setError('');
     try {
+      if (DEMO_MODE) {
+        setPrediction(buildDemoPrediction(t));
+        return;
+      }
       const features = buildTruckFeatureVector(t);
       const res = await apiFetch('/predict/truck', {
         method: 'POST',

@@ -1,3 +1,17 @@
 node_modules/
 build/
 .env
+dist/
+
+# Env files (keep secrets local)
+.env.local
+.env.*
+backend/.env
+src/.env
+src/.env.*
+
+# Python cache/artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

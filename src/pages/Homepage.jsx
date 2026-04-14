@@ -17,6 +17,10 @@ const Homepage = () => {
   // Mobile menu toggle state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const openAutoPilotChat = () => {
+    window.dispatchEvent(new Event('open-autopilot-chat'));
+  };
+
   // ============================================================================
   // EFFECTS
   // ============================================================================
@@ -187,10 +191,10 @@ const Homepage = () => {
         {/* Gradient Orbs - Reduced on mobile */}
         {/* Mouse-following orb - Desktop only */}
         <motion.div
-          className="hidden lg:block absolute w-40 h-40 bg-primary-500/20 rounded-full blur-lg"
+          className="hidden lg:block absolute w-[90px] h-[90px] bg-primary-500/20 rounded-full blur-lg"
           style={{
-            left: mousePosition.x - 80,
-            top: mousePosition.y - 80,
+            left: mousePosition.x - 45,
+            top: mousePosition.y - 45,
           }}
           transition={{ type: 'spring', damping: 30, stiffness: 200 }}
         />
@@ -237,9 +241,13 @@ const Homepage = () => {
             <a href="#how-it-works" className="text-md text-gray-300 hover:text-primary-500 transition-colors">
               How It Works
             </a>
-            <a href="#pricing" className="text-md text-gray-300 hover:text-primary-500 transition-colors">
-              About Us
-            </a>
+            <button
+              type="button"
+              onClick={openAutoPilotChat}
+              className="text-md text-gray-300 hover:text-primary-500 transition-colors"
+            >
+              AutoPilot
+            </button>
           </div>
 
           {/* Desktop Action Buttons */}
@@ -292,13 +300,16 @@ const Homepage = () => {
                 >
                   How It Works
                 </a>
-                <a 
-                  href="#pricing"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-gray-300 hover:text-primary-500 transition-colors py-2"
+                <button
+                  type="button"
+                  onClick={() => {
+                    openAutoPilotChat();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="text-left text-gray-300 hover:text-primary-500 transition-colors py-2"
                 >
-                  About Us
-                </a>
+                  AutoPilot
+                </button>
                 <div className="flex flex-col gap-3 pt-3 border-t border-white/10">
                   <Link 
                     to="/login" 

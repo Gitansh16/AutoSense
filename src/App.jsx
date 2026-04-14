@@ -6,7 +6,11 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import EVPrediction from './pages/EVPrediction';
 import TruckPrediction from './pages/TruckPrediction';
+import History from './pages/History';
+import Analytics from './pages/Analytics';
+import ForgotPassword from './pages/ForgotPassword';
 import Navbar from './components/Navbar';
+import AIChatbot from './components/AIChatbot';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { startKeepAlive } from './utils/keepAlive';
 startKeepAlive();
@@ -37,10 +41,19 @@ function AppRoutes() {
       <Route path="/" element={<Homepage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* Protected */}
       <Route path="/dashboard" element={
         <ProtectedRoute><ProtectedLayout><Dashboard /></ProtectedLayout></ProtectedRoute>
+      } />
+
+      <Route path="/history" element={
+        <ProtectedRoute><ProtectedLayout><History /></ProtectedLayout></ProtectedRoute>
+      } />
+
+      <Route path="/analytics" element={
+        <ProtectedRoute><ProtectedLayout><Analytics /></ProtectedLayout></ProtectedRoute>
       } />
 
       {/* Truck — must be BEFORE the generic :carId catch-all */}
@@ -63,6 +76,7 @@ function App() {
     <AuthProvider>
       <Router>
         <AppRoutes />
+        <AIChatbot />
       </Router>
     </AuthProvider>
   );

@@ -1,4 +1,4 @@
-# 🔋 EV Predictive Maintenance - Frontend
+# AutoSense
 
 Modern, innovative React frontend for AI-powered vehicle predictive maintenance system with stunning animations and car-themed design.
 
@@ -37,7 +37,7 @@ Modern, innovative React frontend for AI-powered vehicle predictive maintenance 
 
 1. **Clone or extract the project:**
 ```bash
-cd ev-predictive-maintenance
+cd AutoSense
 ```
 
 2. **Install dependencies:**
@@ -55,7 +55,7 @@ The app will open at `http://localhost:3000`
 ## 🗂️ Project Structure
 
 ```
-ev-predictive-maintenance/
+AutoSense/
 ├── src/
 │   ├── components/          # Reusable components
 │   │   └── Navbar.jsx       # Navigation bar
@@ -151,6 +151,21 @@ Create `.env` file in root:
 VITE_API_URL=http://localhost:8000
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ```
+
+Create `backend/.env` for backend services:
+
+```env
+MONGO_URI=your_mongo_uri
+DB_NAME=AutoSense
+JWT_SECRET=your_jwt_secret
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+GEMINI_API_KEY=your_gemini_key
+GEMINI_MODEL=gemini-1.5-flash
+GEMINI_API_VERSION=v1
+```
+
+For a custom chatbot icon, place your SVG at `public/chatbot-icon.svg`.
 
 ### Backend Integration
 
@@ -367,4 +382,3 @@ MIT License - feel free to use this project for your needs!
 **Built with ❤️ for predictive maintenance**
 
 For questions or issues, please open a GitHub issue or contact the development team.
-# AutoSense

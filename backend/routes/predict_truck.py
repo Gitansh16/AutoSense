@@ -10,7 +10,6 @@ from typing import List
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -59,40 +58,72 @@ _feature_columns = None
 _model           = None
 _device          = None
 _model_path_used = None
+_load_error      = None
 
 
 def _load_truck_artifacts():
-    global _scaler, _feature_columns, _model, _device, _model_path_used
+    global _scaler, _feature_columns, _model, _device, _model_path_used, _load_error
 
     if _model is not None:
         return  # already loaded
 
-    logger.info(f"[Truck] Looking for artifacts in: {MODEL_DIR}")
+    try:
+        logger.info(f"[Truck] Looking for artifacts in: {MODEL_DIR}")
 
-    if not os.path.exists(SCALER_PATH):
-        raise RuntimeError(f"Truck scaler not found at: {SCALER_PATH}")
-    with open(SCALER_PATH, "rb") as f:
-        _scaler = pickle.load(f)
-    logger.info("Truck scaler loaded.")
+        if not os.path.exists(SCALER_PATH):
+            raise RuntimeError(f"Truck scaler not found at: {SCALER_PATH}")
+        with open(SCALER_PATH, "rb") as f:
+            _scaler = pickle.load(f)
+        logger.info("Truck scaler loaded.")
 
-    if not os.path.exists(FEAT_COL_PATH):
-        raise RuntimeError(f"Feature columns not found at: {FEAT_COL_PATH}")
-    with open(FEAT_COL_PATH, "rb") as f:
-        _feature_columns = pickle.load(f)
-    logger.info(f"Feature columns loaded: {len(_feature_columns)} features.")
+        if not os.path.exists(FEAT_COL_PATH):
+            raise RuntimeError(f"Feature columns not found at: {FEAT_COL_PATH}")
+        with open(FEAT_COL_PATH, "rb") as f:
+            _feature_columns = pickle.load(f)
+        logger.info(f"Feature columns loaded: {len(_feature_columns)} features.")
 
-    _device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    path = MODEL_PATH if os.path.exists(MODEL_PATH) else FALLBACK_PATH
-    if not os.path.exists(path):
-        raise RuntimeError(
-            f"No .pt model found. Checked:\n  {MODEL_PATH}\n  {FALLBACK_PATH}"
-        )
+        _device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        path = MODEL_PATH if os.path.exists(MODEL_PATH) else FALLBACK_PATH
+        if not os.path.exists(path):
+            raise RuntimeError(
+                f"No .pt model found. Checked:\n  {MODEL_PATH}\n  {FALLBACK_PATH}"
+            )
 
-    _model = BiLSTMAttention(input_size=len(_feature_columns)).to(_device)
-    _model.load_state_dict(torch.load(path, map_location=_device))
-    _model.eval()
-    _model_path_used = os.path.basename(path)
-    logger.info(f"Truck model loaded: {path} on {_device}")
+        _model = BiLSTMAttention(input_size=len(_feature_columns)).to(_device)
+        _model.load_state_dict(torch.load(path, map_location=_device))
+        _model.eval()
+        _model_path_used = os.path.basename(path)
+        _load_error = None
+        logger.info(f"Truck model loaded: {path} on {_device}")
+
+    except Exception as e:
+        _scaler = None
+        _feature_columns = None
+        _model = None
+        _device = None
+        _model_path_used = None
+        _load_error = str(e)
+        raise
+
+
+def warmup_truck_models() -> dict:
+    try:
+        _load_truck_artifacts()
+        return {
+            "loaded": True,
+            "error": None,
+            "model": f"BiLSTMAttention ({_model_path_used})",
+            "n_features": len(_feature_columns) if _feature_columns else N_FEATURES,
+            "sequence_length": SEQUENCE_LENGTH,
+        }
+    except Exception:
+        return {
+            "loaded": False,
+            "error": _load_error,
+            "model": None,
+            "n_features": N_FEATURES,
+            "sequence_length": SEQUENCE_LENGTH,
+        }
 
 
 # ── Pydantic schemas ──────────────────────────────────────────────────────────
@@ -135,23 +166,28 @@ async def predict_truck(
     # 1. Load artifacts — return clean 500 if files are missing
     try:
         _load_truck_artifacts()
-    except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=f"Model loading failed: {e}")
+    except Exception as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Model loading failed: {_load_error or str(e)}",
+        )
 
     # 2. Inference
     try:
         features = np.array(request.features, dtype=np.float32)
+        expected_features = len(_feature_columns) if _feature_columns else N_FEATURES
+        expected_sequence_features = SEQUENCE_LENGTH * expected_features
 
-        if features.shape[0] == N_FEATURES:
-            noise = np.random.normal(0, 0.05, (SEQUENCE_LENGTH, N_FEATURES)).astype(np.float32)
-            seq   = np.tile(features, (SEQUENCE_LENGTH, 1)) + noise
-        elif features.shape[0] == SEQUENCE_LENGTH * N_FEATURES:
-            seq = features.reshape(SEQUENCE_LENGTH, N_FEATURES)
+        if features.shape[0] == expected_features:
+            # Deterministic sequence construction for stable repeated predictions.
+            seq = np.tile(features, (SEQUENCE_LENGTH, 1))
+        elif features.shape[0] == expected_sequence_features:
+            seq = features.reshape(SEQUENCE_LENGTH, expected_features)
         else:
             raise HTTPException(
                 status_code=422,
                 detail=(
-                    f"Expected {N_FEATURES} or {SEQUENCE_LENGTH * N_FEATURES} "
+                    f"Expected {expected_features} or {expected_sequence_features} "
                     f"features, got {features.shape[0]}."
                 ),
             )
@@ -188,16 +224,18 @@ async def predict_truck(
 
 @router.get("/truck/status")
 async def truck_model_status(_user=Depends(_get_current_user)):
-    try:
-        _load_truck_artifacts()
+    status = warmup_truck_models()
+    if status["loaded"]:
         return {
             "status":          "ready",
-            "model":           f"BiLSTMAttention ({_model_path_used})",
+            "model":           status["model"],
             "device":          str(_device),
-            "n_features":      len(_feature_columns) if _feature_columns else N_FEATURES,
-            "sequence_length": SEQUENCE_LENGTH,
+            "n_features":      status["n_features"],
+            "sequence_length": status["sequence_length"],
             "n_classes":       N_CLASSES,
             "class_labels":    CLASS_LABELS,
         }
-    except Exception as e:
-        return {"status": "error", "detail": str(e)}
+    return {
+        "status": "error",
+        "detail": status["error"],
+    }

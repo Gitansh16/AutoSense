@@ -24,3 +24,20 @@ export async function apiFetch(endpoint, options = {}) {
 
   return res;
 }
+
+export async function askAIChatbot(message, history = []) {
+  const res = await fetch(`${API_BASE}/ai/chat`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ message, history }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Chat request failed (${res.status})`);
+  }
+
+  return data;
+}

@@ -8,6 +8,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
+from utils.jwt import decode_access_token
 
 router   = APIRouter()
 security = HTTPBearer()
@@ -16,31 +17,60 @@ BASE = Path(__file__).parent.parent / "models"
 
 # ── Load models at startup ────────────────────────────────────────────────────
 _load_error = None
+scaler = None
+classifier = None
+regressor = None
+config = None
+FEATURE_NAMES = []
+RUL_THRESHOLD = 56.1
 
-try:
-    scaler     = joblib.load(BASE / "scaler.pkl")
-    classifier = joblib.load(BASE / "best_classifier.pkl")
-    regressor  = joblib.load(BASE / "best_regressor.pkl")
 
-    with open(BASE / "config.pkl", "rb") as f:
-        config = pickle.load(f)
+def _load_ev_artifacts(force: bool = False) -> bool:
+    global _load_error, scaler, classifier, regressor, config, FEATURE_NAMES, RUL_THRESHOLD
 
-    FEATURE_NAMES = config["feature_names"]
-    RUL_THRESHOLD = float(config["rul_threshold"])
+    if regressor is not None and not force:
+        return True
 
-    print(f"[EV] Models loaded ✓  features={len(FEATURE_NAMES)}  threshold={RUL_THRESHOLD:.1f}d")
+    try:
+        scaler = joblib.load(BASE / "scaler.pkl")
+        classifier = joblib.load(BASE / "best_classifier.pkl")
+        regressor = joblib.load(BASE / "best_regressor.pkl")
 
-except FileNotFoundError as e:
-    _load_error = f"Model file not found: {e}. Place pkl files in backend/models/"
-    scaler = regressor = classifier = config = None
-    FEATURE_NAMES = []; RUL_THRESHOLD = 56.1
-    print(f"[EV] {_load_error}")
+        with open(BASE / "config.pkl", "rb") as f:
+            config = pickle.load(f)
 
-except Exception as e:
-    _load_error = str(e)
-    scaler = regressor = classifier = config = None
-    FEATURE_NAMES = []; RUL_THRESHOLD = 56.1
+        FEATURE_NAMES = list(config["feature_names"])
+        RUL_THRESHOLD = float(config.get("rul_threshold", 56.1))
+        _load_error = None
+        print(f"[EV] Models loaded ✓  features={len(FEATURE_NAMES)}  threshold={RUL_THRESHOLD:.1f}d")
+        return True
+
+    except FileNotFoundError as e:
+        _load_error = f"Model file not found: {e}. Place pkl files in backend/models/."
+    except Exception as e:
+        _load_error = f"Failed to load EV model artifacts: {e}"
+
+    scaler = None
+    classifier = None
+    regressor = None
+    config = None
+    FEATURE_NAMES = []
+    RUL_THRESHOLD = 56.1
     print(f"[EV] ERROR — {_load_error}")
+    return False
+
+
+def warmup_ev_models() -> dict:
+    loaded = _load_ev_artifacts(force=True)
+    return {
+        "loaded": loaded,
+        "error": _load_error,
+        "feature_count": len(FEATURE_NAMES),
+        "rul_threshold": RUL_THRESHOLD,
+    }
+
+
+_load_ev_artifacts()
 
 
 # ── Request schema (42 features, exact order from config.pkl) ─────────────────
@@ -75,21 +105,30 @@ def risk_label(rul: float) -> str:
     return "Critical"
 
 
+def _get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
+    payload = decode_access_token(credentials.credentials)
+    if payload is None or "sub" not in payload:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    return payload
+
+
 # ── POST /predict/ev ──────────────────────────────────────────────────────────
 @router.post("/predict/ev")
 async def predict_ev(
     payload: EVPredictRequest,
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    _user=Depends(_get_current_user),
 ):
-    if regressor is None:
+    if regressor is None and not _load_ev_artifacts(force=True):
         raise HTTPException(status_code=503, detail=_load_error or "Models not loaded.")
 
     # Build DataFrame with named columns — silences LightGBM/sklearn warnings
-    data = payload.dict()
-    try:
-        X_df = pd.DataFrame([data], columns=FEATURE_NAMES)
-    except KeyError as e:
-        raise HTTPException(status_code=422, detail=f"Missing feature: {e}")
+    data = payload.model_dump()
+    missing_features = [f for f in FEATURE_NAMES if f not in data]
+    if missing_features:
+        raise HTTPException(status_code=422, detail=f"Missing features: {missing_features}")
+    X_df = pd.DataFrame([{name: data[name] for name in FEATURE_NAMES}], columns=FEATURE_NAMES)
 
     # Scale using the same named DataFrame
     X_scaled = pd.DataFrame(
@@ -113,15 +152,18 @@ async def predict_ev(
         "risk_class_label": "At Risk" if risk_cls == 0 else "Healthy",
         "confidence_pct":   confidence,
         "rul_threshold":    RUL_THRESHOLD,
-        "reg_r2":           round(config.get("reg_r2",  0), 4),
-        "clf_auc":          round(config.get("clf_auc", 0), 4),
-        "model":            config.get("best_reg_model", "Stacking Ensemble"),
+        "reg_r2":           round((config or {}).get("reg_r2", 0), 4),
+        "clf_auc":          round((config or {}).get("clf_auc", 0), 4),
+        "model":            (config or {}).get("best_reg_model", "Stacking Ensemble"),
     }
 
 
 # ── GET /predict/ev/status ────────────────────────────────────────────────────
 @router.get("/predict/ev/status")
 async def ev_model_status():
+    if regressor is None:
+        _load_ev_artifacts(force=True)
+
     return {
         "loaded":        regressor is not None,
         "error":         _load_error,
