@@ -4,8 +4,8 @@ import { MessageCircle, Send, Sparkles, X } from 'lucide-react';
 import { askAIChatbot } from '../utils/api';
 
 const QUICK_PROMPTS = [
+  'What is AutoSense?',
   'How does AutoSense work?',
-  'Where can I view analytics?',
   'How do EV and truck predictions differ?',
 ];
 

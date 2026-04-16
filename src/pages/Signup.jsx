@@ -247,7 +247,7 @@ const Signup = () => {
                       Create Your Account
                     </h2>
                     <p className="text-gray-400">
-                      Get started with PredictMaintain
+                      Get started with AutoSense
                     </p>
                   </div>
 

@@ -1,158 +1,211 @@
 # AutoSense
 
-Modern, innovative React frontend for AI-powered vehicle predictive maintenance system with stunning animations and car-themed design.
+AutoSense is an AI-powered predictive maintenance platform for EVs, normal cars, and heavy truck engines. It combines a modern React dashboard, independent machine learning inference APIs for each vehicle type, and an in-app assistant called AutoPilot to help users monitor fleet health, estimate remaining useful life, and make faster maintenance decisions.
 
-## ✨ Features
+## What This Project Is Used For
 
-- 🎨 **Modern UI/UX** - Dark mode, glassmorphic cards, electric cyan accents
-- 🚀 **Smooth Animations** - Framer Motion powered transitions and micro-interactions
-- 📱 **Fully Responsive** - Mobile-first design that works on all devices
-- ⚡ **Fast Performance** - Built with Vite for lightning-fast dev experience
-- 🎯 **TypeScript Ready** - Easy migration to TypeScript if needed
-- 🔐 **Auth Flow** - Complete login/signup with multi-step form
-- 📊 **Data Visualization** - Interactive charts with Recharts
-- 🎭 **Component Library** - Reusable, well-organized components
+- Predict EV/normal-car component risk and Remaining Useful Life (RUL).
+- Predict heavy truck engine risk classes using temporal deep learning.
+- Provide fleet analytics and history views for operations teams.
+- Offer in-app product help through AutoPilot AI chatbot (FAQ/app guidance only).
+- Support authenticated workflows for company or fleet users.
 
-## 🛠️ Tech Stack
+## Core Capabilities
 
-- **Framework:** React 18
-- **Build Tool:** Vite
-- **Styling:** Tailwind CSS
-- **Animations:** Framer Motion
-- **Routing:** React Router v6
-- **Charts:** Recharts
-- **Icons:** Lucide React
-- **Forms:** React Hook Form
-- **HTTP Client:** Axios
-- **State Management:** Zustand
+- EV/normal-car prediction endpoint with risk label and confidence.
+- Truck engine prediction endpoint with class probabilities.
+- Secure JWT auth (signup, login, profile).
+- Interactive frontend with protected routes.
+- Startup model warmup and model health checks.
+- Context-aware AI assistant integrated into the UI for simple product FAQs only.
 
-## 📦 Installation
+## Tech Stack
 
-### Prerequisites
+### Frontend
 
-- Node.js 16+ installed
-- npm or yarn package manager
+- React 18
+- Vite 5
+- React Router v6
+- Tailwind CSS
+- Framer Motion
+- Recharts
+- Axios / Fetch
+- React Hook Form
+- Zustand
 
-### Setup
+### Backend
 
-1. **Clone or extract the project:**
-```bash
-cd AutoSense
-```
+- FastAPI
+- Beanie + Motor + MongoDB
+- PyTorch (truck model)
+- Scikit-learn, XGBoost, LightGBM, CatBoost (EV pipeline)
+- Python-JOSE (JWT)
+- Bcrypt
+- Httpx
 
-2. **Install dependencies:**
-```bash
-npm install
-```
+## Project Structure
 
-3. **Start development server:**
-```bash
-npm run dev
-```
-
-The app will open at `http://localhost:3000`
-
-## 🗂️ Project Structure
-
-```
+```text
 AutoSense/
 ├── src/
-│   ├── components/          # Reusable components
-│   │   └── Navbar.jsx       # Navigation bar
-│   ├── pages/               # Page components
-│   │   ├── Homepage.jsx     # Landing page
-│   │   ├── Login.jsx        # Login page
-│   │   ├── Signup.jsx       # Multi-step signup
-│   │   └── Dashboard.jsx    # Main dashboard
-│   ├── App.jsx              # Main app with routing
-│   ├── main.jsx             # Entry point
-│   └── index.css            # Global styles + Tailwind
-├── public/                  # Static assets
-├── index.html               # HTML template
-├── package.json             # Dependencies
-├── tailwind.config.js       # Tailwind configuration
-├── vite.config.js           # Vite configuration
-└── README.md                # This file
+│   ├── components/
+│   │   ├── AIChatbot.jsx
+│   │   ├── AutoSenseHero.jsx
+│   │   └── Navbar.jsx
+│   ├── context/
+│   │   └── AuthContext.jsx
+│   ├── pages/
+│   │   ├── Homepage.jsx
+│   │   ├── Login.jsx
+│   │   ├── Signup.jsx
+│   │   ├── ForgotPassword.jsx
+│   │   ├── Dashboard.jsx
+│   │   ├── EVPrediction.jsx
+│   │   ├── TruckPrediction.jsx
+│   │   ├── History.jsx
+│   │   └── Analytics.jsx
+│   ├── utils/
+│   │   ├── api.js
+│   │   └── keepAlive.js
+│   ├── App.jsx
+│   └── main.jsx
+├── backend/
+│   ├── main.py
+│   ├── database.py
+│   ├── requirements.txt
+│   ├── routes/
+│   │   ├── auth.py
+│   │   ├── predict.py
+│   │   ├── predict_truck.py
+│   │   └── chatbot.py
+│   ├── models/
+│   │   └── user.py
+│   ├── schemas/
+│   │   └── auth.py
+│   ├── utils/
+│   │   ├── auth.py
+│   │   └── jwt.py
+│   └── Truck_Models/
+│       ├── best_hybrid_lambda_009.pt
+│       ├── best_temporal_model.pt
+│       └── scania_inference.py
+├── package.json
+├── tailwind.config.js
+├── vite.config.js
+└── README.md
 ```
 
-## 📄 Available Pages
+## Application Routes (Frontend)
 
-### ✅ Completed Pages
+- Public pages:
+  - `/`
+  - `/login`
+  - `/signup`
+  - `/forgot-password`
+- Protected pages:
+  - `/dashboard`
+  - `/history`
+  - `/analytics`
+  - `/predict/:carId` (EV prediction)
+  - `/predict/truck/:truckId` (truck prediction)
 
-1. **Homepage** (`/`) - Landing page with:
-   - Animated hero section with 3D visuals
-   - Feature showcase
-   - Stats section
-   - How it works
-   - Dual model comparison
-   - CTA sections
+## API Endpoints (Backend)
 
-2. **Login** (`/login`) - Split-screen design with:
-   - Email/password login
-   - Google OAuth option
-   - Password visibility toggle
-   - Remember me checkbox
-   - Forgot password link
+### Health
 
-3. **Signup** (`/signup`) - Multi-step form with:
-   - Step 1: Account details
-   - Step 2: Company information
-   - Step 3: Confirmation
-   - Progress indicator
-   - Password strength checker
+- `GET /` -> API running check
+- `GET /health/models` -> EV and truck warmup/load status
 
-4. **Dashboard** (`/dashboard`) - Main hub with:
-   - Fleet statistics cards
-   - Quick action buttons
-   - Health overview chart
-   - Recent predictions table
+### Auth
 
-### 🚧 To Be Implemented
+- `POST /auth/signup`
+- `POST /auth/login`
+- `GET /auth/me` (Bearer token)
 
-5. **EV Prediction** (`/predict/ev`)
-6. **Normal Vehicle Prediction** (`/predict/normal`)
-7. **History** (`/history`)
-8. **Analytics** (`/analytics`)
-9. **Profile Settings** (`/profile`)
+### EV Prediction
 
-## 🎨 Design System
+- `POST /predict/ev` (Bearer token)
+- `GET /predict/ev/status`
 
-### Colors
+### Truck Prediction
 
-```javascript
-Primary (Electric Cyan): #00D9FF
-Secondary (Indigo): #6366F1
-Success (Green): #10B981
-Warning (Amber): #F59E0B
-Danger (Red): #EF4444
-Dark Background: #0A0E1A
+- `POST /predict/truck` (Bearer token)
+- `GET /predict/truck/status` (Bearer token)
+
+### AutoPilot AI Bot
+
+- `POST /ai/chat`
+
+## AutoPilot AI Bot (Integrated Assistant)
+
+AutoPilot is the in-app AI helper integrated into the frontend and backed by Gemini through FastAPI.
+
+AutoPilot is not part of the prediction pipeline and never performs or influences EV/normal-car/truck model inference.
+
+### What AutoPilot Does
+
+- Answers simple user FAQs about AutoSense.
+- Explains app workflows and navigation.
+- Helps users with app-related questions only.
+- Responds with short, practical product-focused guidance.
+
+### Where It Is Integrated
+
+- Frontend widget component: `src/components/AIChatbot.jsx`
+- API client function: `src/utils/api.js` (`askAIChatbot`)
+- Backend AI route: `backend/routes/chatbot.py`
+- Mounted globally in app shell via `src/App.jsx`
+
+### AutoPilot Request/Response Contract
+
+Request (`POST /ai/chat`):
+
+```json
+{
+  "message": "How does AutoSense work?",
+  "history": [
+    { "role": "user", "text": "What is AutoSense?" },
+    { "role": "assistant", "text": "..." }
+  ]
+}
 ```
 
-### Typography
+Response:
 
-- **Display/Headers:** Outfit (Google Fonts)
-- **Body Text:** Inter (Google Fonts)
-- **Monospace/Data:** JetBrains Mono (Google Fonts)
+```json
+{
+  "answer": "AutoSense predicts maintenance risk for EVs and trucks. Use dashboard, prediction pages, and analytics to monitor fleet health."
+}
+```
 
-### Components
+### AutoPilot Behavior Notes
 
-- **Buttons:** `.btn-primary`, `.btn-secondary`, `.btn-outline`
-- **Cards:** `.glass-card` (glassmorphic style)
-- **Inputs:** `.input-field`
-- **Badges:** `.badge-success`, `.badge-warning`, `.badge-danger`
+- Injects project context and README excerpt into prompt for grounded answers.
+- Keeps responses concise (target 1-2 short sentences).
+- Uses Gemini model fallback targets if configured model is unavailable.
+- If Gemini API key is missing, returns `503` with configuration error.
+- Does not call EV or truck prediction routes and is never used for prediction output.
 
-## 🔧 Configuration
+### AutoPilot UI Notes
 
-### Environment Variables
+- Floating help button with text: "Need help? Ask AutoPilot"
+- Quick prompts included in widget:
+  - What is AutoSense?
+  - How does AutoSense work?
+  - How do EV and truck predictions differ?
+- Supports global open event:
+  - `window.dispatchEvent(new Event('open-autopilot-chat'))`
 
-Create `.env` file in root:
+## Environment Variables
+
+Create root `.env` (frontend):
 
 ```env
 VITE_API_URL=http://localhost:8000
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
-Create `backend/.env` for backend services:
+Create `backend/.env`:
 
 ```env
 MONGO_URI=your_mongo_uri
@@ -160,225 +213,114 @@ DB_NAME=AutoSense
 JWT_SECRET=your_jwt_secret
 JWT_ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
+
 GEMINI_API_KEY=your_gemini_key
-GEMINI_MODEL=gemini-1.5-flash
-GEMINI_API_VERSION=v1
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_API_VERSION=v1beta
 ```
 
-For a custom chatbot icon, place your SVG at `public/chatbot-icon.svg`.
+## Local Setup
 
-### Backend Integration
-
-Update `VITE_API_URL` to point to your FastAPI backend:
-
-```javascript
-// src/config/api.js
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-```
-
-## 🚀 Build for Production
+### 1) Frontend Setup
 
 ```bash
-# Build optimized production bundle
-npm run build
+npm install
+npm run dev
+```
 
-# Preview production build
+Default Vite dev URL is usually `http://localhost:5173` (unless configured otherwise).
+
+### 2) Backend Setup
+
+From `backend/`:
+
+```bash
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+```
+
+### 3) Access App
+
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:8000`
+
+## How To Use AutoSense
+
+1. Sign up or log in.
+2. Open Dashboard to view overall fleet status.
+3. Run EV prediction from EV route with required sensor features.
+4. Run Truck prediction with feature vector input.
+5. Review History and Analytics for trends.
+6. Use AutoPilot for in-app guidance and page-level help.
+
+## Model and Data Requirements
+
+The ML models are independent per vehicle type. EV/normal-car prediction and heavy-truck prediction run on separate model artifacts and separate inference logic.
+
+### EV Artifacts
+
+The EV route expects artifacts under `backend/models/`:
+
+- `scaler.pkl`
+- `best_classifier.pkl`
+- `best_regressor.pkl`
+- `config.pkl`
+
+### Truck Artifacts
+
+The truck route expects artifacts under `backend/Truck_Models/`:
+
+- `best_hybrid_lambda_009.pt` (preferred)
+- `best_temporal_model.pt` (fallback)
+- `scaler_truck.pkl`
+- `feature_columns.pkl`
+
+## Security and Auth Notes
+
+- Protected prediction endpoints require `Authorization: Bearer <token>`.
+- Frontend API helper auto-attaches token from localStorage for protected requests.
+- On `401`, frontend clears token and redirects to login.
+
+## Troubleshooting
+
+### Backend starts but predictions fail
+
+- Verify required model artifact files are present in expected folders.
+- Check `GET /health/models` for warmup status and error details.
+
+### AutoPilot returns configuration error
+
+- Ensure `GEMINI_API_KEY` is set in `backend/.env`.
+- Restart backend after environment changes.
+
+### CORS issue in browser
+
+- Confirm frontend origin is listed in backend CORS config (`backend/main.py`).
+
+### Unauthorized on prediction APIs
+
+- Log in again and confirm Bearer token is present in request headers.
+
+## Production Notes
+
+- Build frontend with:
+
+```bash
+npm run build
 npm run preview
 ```
 
-Output will be in `dist/` folder.
+- Set secure secrets and DB URI in production environment.
+- Keep model artifact files available on deployment target.
+- Restrict CORS to trusted frontend domains.
 
-## 📱 Responsive Breakpoints
+## Future Improvements
 
-```
-sm:  640px  (Mobile landscape)
-md:  768px  (Tablet)
-lg:  1024px (Desktop)
-xl:  1280px (Large desktop)
-2xl: 1536px (Extra large)
-```
+- Add rate limiting and guardrails for AutoPilot endpoint.
+- Persist chat sessions/history to backend.
+- Add role-based access and audit logs.
+- Add unit/integration tests for API routes and chatbot behavior.
 
-## 🎭 Animation Guide
+## License
 
-### Framer Motion Examples
-
-**Page Transitions:**
-```jsx
-<motion.div
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6 }}
->
-  {/* Content */}
-</motion.div>
-```
-
-**Hover Effects:**
-```jsx
-<motion.button
-  whileHover={{ scale: 1.05 }}
-  whileTap={{ scale: 0.95 }}
->
-  Click me
-</motion.button>
-```
-
-**Staggered Children:**
-```jsx
-<motion.div
-  initial="hidden"
-  animate="show"
-  variants={{
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  }}
->
-  {items.map(item => (
-    <motion.div variants={itemVariants}>
-      {item}
-    </motion.div>
-  ))}
-</motion.div>
-```
-
-## 🔗 API Integration Examples
-
-### Login
-```javascript
-import axios from 'axios';
-
-const login = async (email, password) => {
-  try {
-    const response = await axios.post(`${API_URL}/api/auth/login`, {
-      email,
-      password
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
-  }
-};
-```
-
-### Get Predictions
-```javascript
-const getPredictions = async (token) => {
-  try {
-    const response = await axios.get(`${API_URL}/api/predictions/history`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response.data;
-  }
-};
-```
-
-## 🐛 Troubleshooting
-
-### Issue: Tailwind styles not working
-**Solution:** Make sure `tailwind.config.js` content paths are correct:
-```javascript
-content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"]
-```
-
-### Issue: Framer Motion animations laggy
-**Solution:** Use `transform` and `opacity` properties for better performance:
-```javascript
-// Good (GPU accelerated)
-animate={{ opacity: 1, scale: 1 }}
-
-// Avoid (causes reflows)
-animate={{ width: '100px', height: '100px' }}
-```
-
-### Issue: Charts not rendering
-**Solution:** Ensure Recharts ResponsiveContainer has a defined height:
-```jsx
-<div className="h-80">
-  <ResponsiveContainer width="100%" height="100%">
-    {/* Chart components */}
-  </ResponsiveContainer>
-</div>
-```
-
-## 📚 Additional Resources
-
-- [React Documentation](https://react.dev/)
-- [Tailwind CSS Docs](https://tailwindcss.com/docs)
-- [Framer Motion Docs](https://www.framer.com/motion/)
-- [Recharts Examples](https://recharts.org/en-US/examples)
-- [React Router Guide](https://reactrouter.com/)
-
-## 🎯 Next Steps
-
-1. **Complete Remaining Pages:**
-   - EV Prediction page with form
-   - Normal Vehicle Prediction page
-   - History with timeline view
-   - Analytics with SHAP visualizations
-   - Profile settings
-
-2. **Add Backend Integration:**
-   - Connect to FastAPI endpoints
-   - Implement JWT authentication
-   - Add API error handling
-   - Create loading states
-
-3. **Enhance Features:**
-   - Add real-time notifications
-   - Implement file upload for batch predictions
-   - Add export functionality (CSV/PDF)
-   - Create dark/light theme toggle
-
-4. **Testing:**
-   - Add unit tests (Vitest)
-   - E2E tests (Playwright)
-   - Accessibility testing
-
-5. **Deployment:**
-   - Deploy to Vercel/Netlify
-   - Set up CI/CD pipeline
-   - Configure environment variables
-   - Add monitoring
-
-## 📝 Code Style
-
-- Use functional components with hooks
-- Follow ESLint rules (if configured)
-- Use meaningful variable names
-- Add comments for complex logic
-- Keep components small and focused
-- Use Tailwind classes over custom CSS
-
-## 🤝 Contributing
-
-1. Create a feature branch
-2. Make your changes
-3. Test thoroughly
-4. Submit a pull request
-
-## 📄 License
-
-MIT License - feel free to use this project for your needs!
-
-## 💡 Tips for Development
-
-1. **Hot Reload:** Vite provides instant HMR - save and see changes immediately
-2. **Component Dev:** Test components in isolation before integration
-3. **Responsive Testing:** Use browser dev tools to test all breakpoints
-4. **Performance:** Use React DevTools Profiler to identify bottlenecks
-5. **Accessibility:** Test with keyboard navigation and screen readers
-
----
-
-**Built with ❤️ for predictive maintenance**
-
-For questions or issues, please open a GitHub issue or contact the development team.
+MIT

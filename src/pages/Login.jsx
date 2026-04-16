@@ -142,7 +142,7 @@ const Login = () => {
           <Link to="/" className="lg:hidden flex items-center gap-3 mb-8">
             <Battery className="w-8 h-8 text-primary-500" />
             <span className="text-2xl font-outfit font-bold gradient-text">
-              PredictMaintain
+              AutoSense
             </span>
           </Link>
 
