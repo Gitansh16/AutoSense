@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Chatbot icon">
+  <defs>
+    <linearGradient id="chatGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00D9FF" />
+      <stop offset="100%" stop-color="#6366F1" />
+    </linearGradient>
+  </defs>
+  <rect x="8" y="10" width="48" height="36" rx="12" fill="url(#chatGrad)" opacity="0.18" />
+  <rect x="12" y="14" width="40" height="28" rx="10" fill="none" stroke="url(#chatGrad)" stroke-width="4" />
+  <path d="M24 42l-6 10 12-8" fill="none" stroke="url(#chatGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="25" cy="28" r="3" fill="url(#chatGrad)" />
+  <circle cx="32" cy="28" r="3" fill="url(#chatGrad)" />
+  <circle cx="39" cy="28" r="3" fill="url(#chatGrad)" />
+</svg>
