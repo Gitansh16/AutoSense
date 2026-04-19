@@ -6,6 +6,7 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import EVPrediction from './pages/EVPrediction';
 import TruckPrediction from './pages/TruckPrediction';
+import ICEPrediction from './pages/ICEPrediction';
 import History from './pages/History';
 import Analytics from './pages/Analytics';
 import ForgotPassword from './pages/ForgotPassword';
@@ -59,6 +60,11 @@ function AppRoutes() {
       {/* Truck — must be BEFORE the generic :carId catch-all */}
       <Route path="/predict/truck/:truckId" element={
         <ProtectedRoute><ProtectedLayout><TruckPrediction /></ProtectedLayout></ProtectedRoute>
+      } />
+
+      {/* ICE */}
+      <Route path="/predict/ice/:iceId" element={
+        <ProtectedRoute><ProtectedLayout><ICEPrediction /></ProtectedLayout></ProtectedRoute>
       } />
 
       {/* EV */}

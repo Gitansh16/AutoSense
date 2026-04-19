@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, RefreshCw, Wifi, AlertTriangle, CheckCircle,
@@ -29,6 +29,7 @@ const SENSOR_TABS = {
   'Brakes & Air': ['brakeAirPressure', 'airDryerCycles', 'compressorLoad'],
   'Load & Ops':   ['loadWeight', 'oilConsumption', 'apsIndex'],
 };
+const MIN_REFRESH_INDICATOR_MS = 900;
 
 const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
 const STATUS_TO_CLASS = {
@@ -201,8 +202,11 @@ const TruckPrediction = () => {
   const [prediction, setPrediction] = useState(null);
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState('');
+  const [refreshing, setRefreshing] = useState(false);
   const [activeTab,  setActiveTab]  = useState(0);
   const [runCount,   setRunCount]   = useState(0);
+  const refreshStartedAtRef = useRef(0);
+  const manualRefreshRef = useRef(false);
 
   useEffect(() => {
     const found = trucks.find((t) => t.id === truckId);
@@ -227,10 +231,29 @@ const TruckPrediction = () => {
       if (!res.ok) { const e = await res.json(); throw new Error(e.detail || 'Prediction failed'); }
       setPrediction(await res.json());
     } catch (e) { setError(e.message); }
-    finally { setLoading(false); }
+    finally {
+      if (manualRefreshRef.current) {
+        const elapsed = Date.now() - refreshStartedAtRef.current;
+        const waitMs = Math.max(0, MIN_REFRESH_INDICATOR_MS - elapsed);
+        if (waitMs > 0) {
+          await new Promise((resolve) => setTimeout(resolve, waitMs));
+        }
+        manualRefreshRef.current = false;
+        setRefreshing(false);
+      }
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { if (truck) runPrediction(truck); }, [truck, runCount]);
+
+  const handleRefresh = () => {
+    if (loading || refreshing) return;
+    manualRefreshRef.current = true;
+    refreshStartedAtRef.current = Date.now();
+    setRefreshing(true);
+    setRunCount((c) => c + 1);
+  };
 
   const riskMeta      = prediction ? getTruckRiskLevel(prediction.predicted_class) : null;
   const sectionHealth = truck      ? getTruckSectionHealth(truck)                  : null;
@@ -289,12 +312,12 @@ const TruckPrediction = () => {
               </div>
             </div>
           </div>
-          <button onClick={() => setRunCount((c) => c + 1)} disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-500/10 border border-primary-500/30 text-primary-400 hover:bg-primary-500/20 transition-all disabled:opacity-50">
-            <motion.div animate={loading ? { rotate: 360 } : {}} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+          <button onClick={handleRefresh} disabled={loading || refreshing}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-500/10 border border-primary-500/30 text-primary-400 hover:bg-primary-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            <motion.div animate={loading || refreshing ? { rotate: 360 } : {}} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
               <RefreshCw className="w-4 h-4" />
             </motion.div>
-            <span className="text-sm font-medium">Re-run Model</span>
+            <span className="text-sm font-medium">{loading || refreshing ? 'Re-running...' : 'Re-run Model'}</span>
           </button>
         </motion.div>
 

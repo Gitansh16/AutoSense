@@ -3,12 +3,13 @@ import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Battery, Car, AlertTriangle, CheckCircle,
-  Upload, BarChart3, Clock, Activity, ArrowRight, X, Zap, Truck
+  Upload, BarChart3, Clock, Activity, ArrowRight, X, Zap, Truck, Fuel
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ResponsiveContainer, Area, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import evMockData from '../mock/evmockData';
 import trucks from '../mock/truckMockData';
+import iceMockData from '../mock/iceMockData';
 
 // ─── Shared status config ────────────────────────────────────────────────────
 
@@ -250,6 +251,122 @@ const TruckSelectorModal = ({ onClose }) => {
   );
 };
 
+// ─── ICE Car Selector Modal ──────────────────────────────────────────────────
+
+const ICECarSelectorModal = ({ onClose }) => {
+  const [selected, setSelected] = useState(null);
+  const navigate = useNavigate();
+
+  const handleStart = () => {
+    if (selected) navigate(`/predict/ice/${selected.id}`);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="glass-card w-full max-w-md p-6 relative"
+        onClick={e => e.stopPropagation()}
+      >
+        <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+          <X className="w-4 h-4 text-gray-400" />
+        </button>
+
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
+              <Fuel className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-xl font-outfit font-bold">ICE Prediction</h2>
+          </div>
+          <p className="text-sm text-gray-400 ml-12">Select a petrol or diesel vehicle to run the prediction model</p>
+        </div>
+
+        <div className="space-y-3 mb-6">
+          {iceMockData.map(car => {
+            const s = statusConfig[car.status];
+            const isSelected = selected?.id === car.id;
+            return (
+              <motion.button
+                key={car.id}
+                whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
+                onClick={() => setSelected(car)}
+                className={`w-full text-left p-4 rounded-xl border transition-all ${
+                  isSelected ? `${s.borderColor} ${s.bg}` : 'border-white/10 bg-white/5 hover:bg-white/8 hover:border-white/20'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: s.dotColor }} />
+                    <div>
+                      <div className="font-outfit font-semibold text-sm">{car.carName}</div>
+                      <div className="text-xs text-gray-400 mt-0.5">{car.carCompany} · {car.year} · {car.fuelType}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right hidden sm:block">
+                      <div className="text-xs text-gray-400">RPM <span className="text-white font-mono font-semibold">{car.Engine_RPM}</span></div>
+                      <div className="text-xs text-gray-400 mt-0.5">Fuel <span className="text-white font-mono font-semibold">{car.Fuel_Level}%</span></div>
+                    </div>
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${s.textColor} ${s.bg} border ${s.borderColor}`}>
+                      {s.label}
+                    </span>
+                    {isSelected && (
+                      <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                        <CheckCircle className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                      className="mt-3 pt-3 border-t border-white/10 grid grid-cols-3 gap-2"
+                    >
+                      {[
+                        { label: 'Coolant', value: `${car.Coolant_Temperature}C` },
+                        { label: 'NOx', value: `${car.NOx_Level} ppm` },
+                        { label: 'Mileage', value: `${car.Mileage} km/L` },
+                      ].map(m => (
+                        <div key={m.label} className="text-center">
+                          <div className="text-xs text-gray-400">{m.label}</div>
+                          <div className="text-sm font-mono font-bold mt-0.5">{m.value}</div>
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            );
+          })}
+        </div>
+
+        <motion.button
+          whileHover={selected ? { scale: 1.02 } : {}} whileTap={selected ? { scale: 0.98 } : {}}
+          onClick={handleStart} disabled={!selected}
+          className={`w-full py-3 rounded-xl font-outfit font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+            selected
+              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg hover:shadow-orange-500/25'
+              : 'bg-white/5 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          <Fuel className="w-4 h-4" />
+          {selected ? `Run prediction - ${selected.carName}` : 'Select a vehicle to continue'}
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 // ─── Main Dashboard ──────────────────────────────────────────────────────────
 
 const Dashboard = () => {
@@ -260,12 +377,14 @@ const Dashboard = () => {
 
   const [showEVModal,    setShowEVModal]    = useState(false);
   const [showTruckModal, setShowTruckModal] = useState(false);
+  const [showICEModal,   setShowICEModal]   = useState(false);
 
   // Auto-open modal when navigated here from Navbar submenu
   useEffect(() => {
     const modal = location.state?.openModal;
     if (modal === 'ev')    setShowEVModal(true);
     if (modal === 'truck') setShowTruckModal(true);
+    if (modal === 'ice')   setShowICEModal(true);
     window.history.replaceState({}, '');
   }, [location.state]);
 
@@ -289,6 +408,7 @@ const Dashboard = () => {
   const recentPredictions = [
     { id: 'EV-1234',  type: 'EV',    rul: 127, status: 'Good',     time: '2h ago' },
     { id: 'TRK-5678', type: 'Truck', rul: 89,  status: 'Good',     time: '3h ago' },
+    { id: 'ICE-7781', type: 'ICE',   rul: 73,  status: 'Warning',  time: '4h ago' },
     { id: 'EV-9012',  type: 'EV',    rul: 45,  status: 'Warning',  time: '5h ago' },
     { id: 'TRK-3456', type: 'Truck', rul: 15,  status: 'Critical', time: '1d ago' },
   ];
@@ -306,6 +426,7 @@ const Dashboard = () => {
     switch (type) {
       case 'EV':    return <Battery className="w-5 h-5 text-primary-500" />;
       case 'Truck': return <Truck   className="w-5 h-5 text-orange-400"  />;
+      case 'ICE':   return <Fuel    className="w-5 h-5 text-amber-400"   />;
       default:      return <Car     className="w-5 h-5 text-secondary-500" />;
     }
   };
@@ -314,6 +435,7 @@ const Dashboard = () => {
     switch (type) {
       case 'EV':    return 'bg-primary-500/10 text-primary-500 border-primary-500/30';
       case 'Truck': return 'bg-orange-500/10 text-orange-400 border-orange-500/30';
+      case 'ICE':   return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
       default:      return 'bg-secondary-500/10 text-secondary-500 border-secondary-500/30';
     }
   };
@@ -363,7 +485,7 @@ const Dashboard = () => {
         {/* Quick Actions */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <h2 className="text-xl md:text-2xl font-outfit font-bold mb-3 md:mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
 
             {/* EV Predict */}
             <button onClick={() => setShowEVModal(true)} className="glass-card p-4 md:p-6 card-hover group text-center w-full">
@@ -385,6 +507,18 @@ const Dashboard = () => {
               <h3 className="font-outfit font-bold text-sm md:text-lg mb-1 md:mb-2">Predict Truck</h3>
               <p className="text-xs md:text-sm text-gray-400 mb-2 md:mb-4 hidden sm:block">Commercial Vehicle Analysis</p>
               <div className="text-orange-400 group-hover:translate-x-2 transition-transform inline-flex items-center gap-1 md:gap-2 text-sm">
+                Start <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
+              </div>
+            </button>
+
+            {/* ICE Predict */}
+            <button onClick={() => setShowICEModal(true)} className="glass-card p-4 md:p-6 card-hover group text-center w-full">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4 group-hover:scale-110 transition-transform">
+                <Fuel className="w-6 h-6 md:w-8 md:h-8 text-white" />
+              </div>
+              <h3 className="font-outfit font-bold text-sm md:text-lg mb-1 md:mb-2">Predict ICE</h3>
+              <p className="text-xs md:text-sm text-gray-400 mb-2 md:mb-4 hidden sm:block">Petrol and Diesel Analysis</p>
+              <div className="text-amber-400 group-hover:translate-x-2 transition-transform inline-flex items-center gap-1 md:gap-2 text-sm">
                 Start <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
               </div>
             </button>
@@ -553,6 +687,7 @@ const Dashboard = () => {
       <AnimatePresence>
         {showEVModal    && <EVCarSelectorModal onClose={() => setShowEVModal(false)}    />}
         {showTruckModal && <TruckSelectorModal onClose={() => setShowTruckModal(false)} />}
+        {showICEModal   && <ICECarSelectorModal onClose={() => setShowICEModal(false)}   />}
       </AnimatePresence>
     </div>
   );

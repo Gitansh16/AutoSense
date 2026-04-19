@@ -201,6 +201,7 @@ const SENSOR_TABS = [
   { id: "brakes",      label: "Brakes & Tyres", icon: Gauge    },
   { id: "environment", label: "Environment",    icon: Wind     },
 ];
+const MIN_REFRESH_INDICATOR_MS = 900;
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function EVPrediction() {
@@ -215,6 +216,8 @@ export default function EVPrediction() {
   const [error,      setError]      = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab,  setActiveTab]  = useState("battery");
+  const refreshStartedAtRef = useRef(0);
+  const manualRefreshRef = useRef(false);
 
   const runPrediction = async () => {
     setLoading(true); setError(null); setPrediction(null);
@@ -243,13 +246,28 @@ export default function EVPrediction() {
     } catch (e) {
       setError(e.message || "Could not connect to prediction server.");
     } finally {
-      setLoading(false); setRefreshing(false);
+      if (manualRefreshRef.current) {
+        const elapsed = Date.now() - refreshStartedAtRef.current;
+        const waitMs = Math.max(0, MIN_REFRESH_INDICATOR_MS - elapsed);
+        if (waitMs > 0) {
+          await new Promise((resolve) => setTimeout(resolve, waitMs));
+        }
+        manualRefreshRef.current = false;
+        setRefreshing(false);
+      }
+      setLoading(false);
     }
   };
 
   useEffect(() => { runPrediction(); }, [car.id]);
 
-  const handleRefresh = () => { setRefreshing(true); runPrediction(); };
+  const handleRefresh = () => {
+    if (loading || refreshing) return;
+    manualRefreshRef.current = true;
+    refreshStartedAtRef.current = Date.now();
+    setRefreshing(true);
+    runPrediction();
+  };
 
   const sensorPanels = {
     battery: [
@@ -324,10 +342,10 @@ export default function EVPrediction() {
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
               <span className="text-xs text-gray-400">OBD2 Live (demo)</span>
             </div>
-            <button onClick={handleRefresh} disabled={loading}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm text-gray-400 hover:text-white transition-all disabled:opacity-40">
-              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-              Re-run model
+            <button onClick={handleRefresh} disabled={loading || refreshing}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm text-gray-400 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+              <RefreshCw className={`w-4 h-4 ${loading || refreshing ? "animate-spin" : ""}`} />
+              {loading || refreshing ? "Re-running..." : "Re-run model"}
             </button>
           </div>
         </motion.div>
