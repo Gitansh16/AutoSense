@@ -1,326 +1,409 @@
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=180&section=header&text=AutoSense&fontSize=42&fontAlignY=35&animation=fadeIn"/>
+
 # AutoSense
 
-AutoSense is an AI-powered predictive maintenance platform for EVs, normal cars, and heavy truck engines. It combines a modern React dashboard, independent machine learning inference APIs for each vehicle type, and an in-app assistant called AutoPilot to help users monitor fleet health, estimate remaining useful life, and make faster maintenance decisions.
+AutoSense is an AI-powered predictive maintenance and intelligent vehicle analytics platform designed for Electric Vehicles (EVs), Internal Combustion Engine (ICE) vehicles, and heavy-duty trucks.
 
-## What This Project Is Used For
+The platform combines advanced machine learning models, real-time analytics, cloud-ready backend architecture, and intelligent monitoring systems to predict vehicle risks, estimate maintenance requirements, and improve operational reliability.
 
-- Predict EV/normal-car component risk and Remaining Useful Life (RUL).
-- Predict heavy truck engine risk classes using temporal deep learning.
-- Provide fleet analytics and history views for operations teams.
-- Offer in-app product help through AutoPilot AI chatbot (FAQ/app guidance only).
-- Support authenticated workflows for company or fleet users.
+AutoSense integrates a modern React-based frontend dashboard with a FastAPI-powered backend API, secure authentication system, AI assistant support, and machine learning inference pipelines capable of handling both classical ML and deep learning workloads.
 
-## Core Capabilities
+The project demonstrates the integration of intelligent transportation systems, predictive maintenance, cloud-native architecture, and AI-driven analytics into a scalable real-world platform.
 
-- EV/normal-car prediction endpoint with risk label and confidence.
-- Truck engine prediction endpoint with class probabilities.
-- Secure JWT auth (signup, login, profile).
-- Interactive frontend with protected routes.
-- Startup model warmup and model health checks.
-- Context-aware AI assistant integrated into the UI for simple product FAQs only.
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
 
-## Tech Stack
+# Problem Statement
 
-### Frontend
+Modern transportation systems generate massive amounts of telemetry, operational, and maintenance data. However, many organizations still rely on reactive maintenance approaches, resulting in:
+
+- Unexpected vehicle breakdowns
+- Increased operational costs
+- Downtime and fleet inefficiencies
+- Difficulty predicting component failures
+- Poor visibility into vehicle health
+- Lack of centralized analytics
+- Limited AI-driven operational insights
+
+Fleet operators, logistics companies, and intelligent transportation systems require scalable solutions capable of:
+
+- Predicting maintenance risks
+- Estimating component degradation
+- Monitoring vehicle health continuously
+- Analyzing fleet performance
+- Providing intelligent decision support
+- Supporting real-time analytics workflows
+
+AutoSense addresses these challenges using machine learning, AI-powered analytics, deep learning inference systems, and cloud-native backend architecture.
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
+
+# Project Objectives
+
+The primary objectives of AutoSense are:
+
+- To build an intelligent predictive maintenance platform
+- To analyze vehicle telemetry and operational data
+- To predict vehicle health risks
+- To estimate Remaining Useful Life (RUL)
+- To provide fleet analytics and monitoring
+- To support EV, ICE vehicles, and heavy trucks
+- To integrate AI-powered assistance systems
+- To develop scalable cloud-ready backend services
+- To provide secure authentication and user management
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
+
+# Core Features
+
+## Predictive Maintenance System
+
+AutoSense predicts:
+
+- Vehicle health conditions
+- Maintenance requirements
+- Operational degradation patterns
+- Risk scores
+- Remaining Useful Life (RUL)
+
+The system uses machine learning models trained on telemetry and operational datasets.
+
+## EV and ICE Vehicle Prediction
+
+The platform provides intelligent predictive analytics for:
+
+- Electric Vehicles (EVs)
+- Internal Combustion Engine (ICE) vehicles
+
+Prediction APIs generate:
+
+- Risk probabilities
+- Confidence scores
+- Operational insights
+
+## Heavy Truck Risk Prediction
+
+The project includes a dedicated truck prediction pipeline using PyTorch temporal models capable of analyzing heavy vehicle operational behavior.
+
+## AI Assistant Integration
+
+AutoSense includes an intelligent AI assistant named:
+
+```bash
+AutoPilot
+```
+
+The assistant helps users with:
+
+- Platform guidance
+- Navigation support
+- Workflow assistance
+- Product-related help
+
+## Analytics Dashboard
+
+The dashboard provides:
+
+- Prediction history
+- Vehicle analytics
+- Risk monitoring
+- Operational insights
+- User activity tracking
+
+## Secure Authentication System
+
+The platform implements secure authentication using:
+
+- JWT authentication
+- Protected routes
+- Password hashing
+- User authorization
+
+## Model Warmup and Health Monitoring
+
+The backend automatically loads and warms machine learning models during startup to ensure low-latency prediction performance.
+
+Health monitoring APIs track:
+
+- Model availability
+- Backend readiness
+- System status
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
+
+# System Architecture
+
+AutoSense follows a full-stack cloud-ready architecture.
+
+## Frontend
+
+Built using:
 
 - React 18
-- Vite 5
-- React Router v6
+- Vite
 - Tailwind CSS
+- React Router
+- Zustand
 - Framer Motion
 - Recharts
-- Axios / Fetch
-- React Hook Form
-- Zustand
 
-### Backend
+The frontend provides:
+
+- Interactive dashboards
+- Protected pages
+- Prediction interfaces
+- Analytics visualizations
+- Responsive UI experience
+
+## Backend
+
+Built using:
 
 - FastAPI
-- Beanie + Motor + MongoDB
-- PyTorch (truck model)
-- Scikit-learn, XGBoost, LightGBM, CatBoost (EV pipeline)
-- Python-JOSE (JWT)
-- Bcrypt
-- Httpx
+- Uvicorn
+- MongoDB
+- Beanie ODM
+- Motor
+- PyMongo
 
-## Project Structure
+The backend handles:
 
-```text
-AutoSense/
-├── src/
-│   ├── components/
-│   │   ├── AIChatbot.jsx
-│   │   ├── AutoSenseHero.jsx
-│   │   └── Navbar.jsx
-│   ├── context/
-│   │   └── AuthContext.jsx
-│   ├── pages/
-│   │   ├── Homepage.jsx
-│   │   ├── Login.jsx
-│   │   ├── Signup.jsx
-│   │   ├── ForgotPassword.jsx
-│   │   ├── Dashboard.jsx
-│   │   ├── EVPrediction.jsx
-│   │   ├── TruckPrediction.jsx
-│   │   ├── History.jsx
-│   │   └── Analytics.jsx
-│   ├── utils/
-│   │   ├── api.js
-│   │   └── keepAlive.js
-│   ├── App.jsx
-│   └── main.jsx
-├── backend/
-│   ├── main.py
-│   ├── database.py
-│   ├── requirements.txt
-│   ├── routes/
-│   │   ├── auth.py
-│   │   ├── predict.py
-│   │   ├── predict_truck.py
-│   │   └── chatbot.py
-│   ├── models/
-│   │   └── user.py
-│   ├── schemas/
-│   │   └── auth.py
-│   ├── utils/
-│   │   ├── auth.py
-│   │   └── jwt.py
-│   └── Truck_Models/
-│       ├── best_hybrid_lambda_009.pt
-│       ├── best_temporal_model.pt
-│       └── scania_inference.py
-├── package.json
-├── tailwind.config.js
-├── vite.config.js
-└── README.md
+- Authentication
+- Prediction APIs
+- Database communication
+- AI assistant services
+- Model inference pipelines
+
+## Machine Learning Layer
+
+The ML system integrates:
+
+- Scikit-learn
+- XGBoost
+- LightGBM
+- CatBoost
+- PyTorch
+
+The platform supports both:
+
+- Classical ML pipelines
+- Deep learning temporal models
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
+
+# API Endpoints
+
+## Authentication APIs
+
+```bash
+POST /auth/signup
+POST /auth/login
+GET  /auth/me
 ```
 
-## Application Routes (Frontend)
+## Prediction APIs
 
-- Public pages:
-  - `/`
-  - `/login`
-  - `/signup`
-  - `/forgot-password`
-- Protected pages:
-  - `/dashboard`
-  - `/history`
-  - `/analytics`
-  - `/predict/:carId` (EV prediction)
-  - `/predict/truck/:truckId` (truck prediction)
-
-## API Endpoints (Backend)
-
-### Health
-
-- `GET /` -> API running check
-- `GET /health/models` -> EV and truck warmup/load status
-
-### Auth
-
-- `POST /auth/signup`
-- `POST /auth/login`
-- `GET /auth/me` (Bearer token)
-
-### EV Prediction
-
-- `POST /predict/ev` (Bearer token)
-- `GET /predict/ev/status`
-
-### Truck Prediction
-
-- `POST /predict/truck` (Bearer token)
-- `GET /predict/truck/status` (Bearer token)
-
-### AutoPilot AI Bot
-
-- `POST /ai/chat`
-
-## AutoPilot AI Bot (Integrated Assistant)
-
-AutoPilot is the in-app AI helper integrated into the frontend and backed by Gemini through FastAPI.
-
-AutoPilot is not part of the prediction pipeline and never performs or influences EV/normal-car/truck model inference.
-
-### What AutoPilot Does
-
-- Answers simple user FAQs about AutoSense.
-- Explains app workflows and navigation.
-- Helps users with app-related questions only.
-- Responds with short, practical product-focused guidance.
-
-### Where It Is Integrated
-
-- Frontend widget component: `src/components/AIChatbot.jsx`
-- API client function: `src/utils/api.js` (`askAIChatbot`)
-- Backend AI route: `backend/routes/chatbot.py`
-- Mounted globally in app shell via `src/App.jsx`
-
-### AutoPilot Request/Response Contract
-
-Request (`POST /ai/chat`):
-
-```json
-{
-  "message": "How does AutoSense work?",
-  "history": [
-    { "role": "user", "text": "What is AutoSense?" },
-    { "role": "assistant", "text": "..." }
-  ]
-}
+```bash
+POST /predict/ev
+GET  /predict/ev/status
+POST /predict/truck
+GET  /predict/truck/status
 ```
 
-Response:
+## AI Assistant API
 
-```json
-{
-  "answer": "AutoSense predicts maintenance risk for EVs and trucks. Use dashboard, prediction pages, and analytics to monitor fleet health."
-}
+```bash
+POST /ai/chat
 ```
 
-### AutoPilot Behavior Notes
+## Health APIs
 
-- Injects project context and README excerpt into prompt for grounded answers.
-- Keeps responses concise (target 1-2 short sentences).
-- Uses Gemini model fallback targets if configured model is unavailable.
-- If Gemini API key is missing, returns `503` with configuration error.
-- Does not call EV or truck prediction routes and is never used for prediction output.
-
-### AutoPilot UI Notes
-
-- Floating help button with text: "Need help? Ask AutoPilot"
-- Quick prompts included in widget:
-  - What is AutoSense?
-  - How does AutoSense work?
-  - How do EV and truck predictions differ?
-- Supports global open event:
-  - `window.dispatchEvent(new Event('open-autopilot-chat'))`
-
-## Environment Variables
-
-Create root `.env` (frontend):
-
-```env
-VITE_API_URL=http://localhost:8000
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```bash
+GET /
+GET /health/models
 ```
 
-Create `backend/.env`:
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
 
-```env
-MONGO_URI=your_mongo_uri
-DB_NAME=AutoSense
-JWT_SECRET=your_jwt_secret
-JWT_ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+# Machine Learning and Inference
 
-GEMINI_API_KEY=your_gemini_key
-GEMINI_MODEL=gemini-2.5-flash
-GEMINI_API_VERSION=v1beta
-```
+The platform combines multiple AI techniques including:
 
-## Local Setup
+- Regression analysis
+- Classification algorithms
+- Ensemble learning
+- Gradient boosting
+- Temporal deep learning models
+- Feature engineering
+- Predictive analytics
 
-### 1) Frontend Setup
+Truck prediction systems use PyTorch temporal model weights for advanced inference workflows.
+
+The backend performs model warmup during startup to optimize inference speed and reduce prediction latency.
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
+
+# Security and Authentication
+
+AutoSense implements:
+
+- JWT bearer authentication
+- Password hashing using bcrypt
+- Protected API routes
+- Secure session handling
+- CORS configuration
+- Environment-based configuration management
+
+This improves platform security and user protection.
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
+
+# Advantages of AutoSense
+
+- Intelligent predictive maintenance
+- Real-time analytics and monitoring
+- Support for multiple vehicle categories
+- AI-powered assistant integration
+- Scalable full-stack architecture
+- Cloud-ready deployment capability
+- Secure authentication system
+- Explainable operational insights
+- Fleet management support
+- Advanced ML and deep learning integration
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
+
+# Technologies Used
+
+## Frontend Technologies
+
+- React 18
+- Vite
+- Tailwind CSS
+- React Router
+- Framer Motion
+- Zustand
+- Recharts
+- Axios
+
+## Backend Technologies
+
+- FastAPI
+- Uvicorn
+- MongoDB
+- Motor
+- Beanie ODM
+- PyMongo
+
+## Machine Learning and AI
+
+- Scikit-learn
+- XGBoost
+- LightGBM
+- CatBoost
+- PyTorch
+- NumPy
+- Pandas
+- SciPy
+
+## Authentication and Security
+
+- JWT
+- bcrypt
+- python-jose
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
+
+# Installation and Setup
+
+## Install Frontend Dependencies
 
 ```bash
 npm install
+```
+
+## Install Backend Dependencies
+
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+## Start Backend Server
+
+```bash
+uvicorn backend.main:app --reload
+```
+
+## Start Frontend Application
+
+```bash
 npm run dev
 ```
 
-Default Vite dev URL is usually `http://localhost:5173` (unless configured otherwise).
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
 
-### 2) Backend Setup
+# Applications
 
-From `backend/`:
+AutoSense can be applied in:
 
-```bash
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-```
+- Predictive maintenance systems
+- Fleet management platforms
+- EV monitoring systems
+- Logistics and transportation analytics
+- Intelligent transportation systems
+- Automotive AI research
+- Vehicle health monitoring
+- Smart mobility solutions
 
-### 3) Access App
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
 
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:8000`
+# Future Enhancements
 
-## How To Use AutoSense
+Future improvements planned for AutoSense include:
 
-1. Sign up or log in.
-2. Open Dashboard to view overall fleet status.
-3. Run EV prediction from EV route with required sensor features.
-4. Run Truck prediction with feature vector input.
-5. Review History and Analytics for trends.
-6. Use AutoPilot for in-app guidance and page-level help.
+- Real-time IoT telemetry streaming
+- Edge AI deployment
+- Cloud-native microservices architecture
+- Digital twin integration
+- Advanced anomaly detection
+- Mobile application support
+- Real-time fleet tracking
+- Explainable AI dashboards
+- Battery degradation forecasting
 
-## Model and Data Requirements
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
 
-The ML models are independent per vehicle type. EV/normal-car prediction and heavy-truck prediction run on separate model artifacts and separate inference logic.
+# Educational Value
 
-### EV Artifacts
+This project demonstrates practical implementation of:
 
-The EV route expects artifacts under `backend/models/`:
+- Full-stack application development
+- Cloud-ready backend architecture
+- FastAPI REST API development
+- MongoDB integration
+- Predictive maintenance systems
+- Machine learning deployment
+- Deep learning inference systems
+- Secure authentication workflows
+- AI-powered analytics platforms
 
-- `scaler.pkl`
-- `best_classifier.pkl`
-- `best_regressor.pkl`
-- `config.pkl`
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
 
-### Truck Artifacts
+# Conclusion
 
-The truck route expects artifacts under `backend/Truck_Models/`:
+AutoSense is a scalable AI-powered predictive maintenance and intelligent transportation platform developed to improve vehicle reliability, operational efficiency, and maintenance forecasting.
 
-- `best_hybrid_lambda_009.pt` (preferred)
-- `best_temporal_model.pt` (fallback)
-- `scaler_truck.pkl`
-- `feature_columns.pkl`
+By integrating modern frontend technologies, cloud-ready backend systems, machine learning pipelines, deep learning models, and intelligent analytics, AutoSense demonstrates the future potential of AI-driven transportation and fleet intelligence systems.
 
-## Security and Auth Notes
+The platform highlights the role of predictive analytics and intelligent monitoring in the evolution of smart mobility ecosystems.
 
-- Protected prediction endpoints require `Authorization: Bearer <token>`.
-- Frontend API helper auto-attaches token from localStorage for protected requests.
-- On `401`, frontend clears token and redirects to login.
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&height=2.5"/>
 
-## Troubleshooting
+# Developer
 
-### Backend starts but predictions fail
+Gitansh Pise
 
-- Verify required model artifact files are present in expected folders.
-- Check `GET /health/models` for warmup status and error details.
+GitHub:
+https://github.com/Gitansh16
 
-### AutoPilot returns configuration error
-
-- Ensure `GEMINI_API_KEY` is set in `backend/.env`.
-- Restart backend after environment changes.
-
-### CORS issue in browser
-
-- Confirm frontend origin is listed in backend CORS config (`backend/main.py`).
-
-### Unauthorized on prediction APIs
-
-- Log in again and confirm Bearer token is present in request headers.
-
-## Production Notes
-
-- Build frontend with:
-
-```bash
-npm run build
-npm run preview
-```
-
-- Set secure secrets and DB URI in production environment.
-- Keep model artifact files available on deployment target.
-- Restrict CORS to trusted frontend domains.
-
-## Future Improvements
-
-- Add rate limiting and guardrails for AutoPilot endpoint.
-- Persist chat sessions/history to backend.
-- Add role-based access and audit logs.
-- Add unit/integration tests for API routes and chatbot behavior.
-
-## License
-
-MIT
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=120&section=footer"/>
